@@ -6,3 +6,5 @@ scikit-learn
 joblib
 python-dotenv
 matplotlib
+pydrive
+python-dotenv
