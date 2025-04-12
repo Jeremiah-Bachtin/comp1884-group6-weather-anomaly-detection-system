@@ -96,14 +96,6 @@ python run_pipeline.py
 
 ---
 
-## 🔗 Useful Links
-
-- 📁 [Google Drive Folder (Shared)](https://drive.google.com) ← *Insert correct link*
-- 📊 [COMP1884 Presentation Specification](../path/to/COMP1884_Presentation_specifications_2024-25.pdf)
-- 🧠 [COMP1884 Project Guidance](../path/to/Group-individual-project-guidance_2024-25.pdf)
-
----
-
 ## 🧠 Want to Contribute?
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for coding guidelines, naming conventions, and branch management tips.
