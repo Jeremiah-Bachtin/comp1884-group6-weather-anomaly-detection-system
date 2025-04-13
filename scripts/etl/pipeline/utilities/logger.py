@@ -5,6 +5,8 @@ Logs timestamped messages into a daily file under data/logs.
 
 import os
 from datetime import datetime
+import pytz
+
 
 # Dynamically set project root
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -13,7 +15,8 @@ LOG_FILE = os.path.join(LOG_DIR, "ingestion.log")
 
 def log_event(message, module="general"):
     os.makedirs(LOG_DIR, exist_ok=True)
-    timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    london = pytz.timezone("Europe/London")
+    timestamp = datetime.now(london).strftime("%Y-%m-%d %H:%M:%S %Z")
     with open(LOG_FILE, "a") as f:
         f.write(f"[{timestamp}] [{module}] {message}\n")
     print(f"[LOG - {module}] {message}")

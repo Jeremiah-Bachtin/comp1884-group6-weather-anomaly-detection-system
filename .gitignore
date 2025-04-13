@@ -39,6 +39,7 @@ credentials.json
 *.tmp
 *.bak
 .DS_Store
+logs/
 
 # === Model artifacts ===
 *.h5
@@ -71,6 +72,3 @@ scripts/xai/experiments/*
 scripts/dashboard/output/*
 scripts/community/staging/*
 
-# === Final reports or slides (keep versions on Google Drive instead) ===
-presentation_assets/*
-!presentation_assets/draft_slides/
