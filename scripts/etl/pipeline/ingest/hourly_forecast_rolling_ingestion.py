@@ -4,18 +4,14 @@ import pandas as pd
 import openmeteo_requests
 import requests_cache
 from retry_requests import retry
-from scripts.etl.pipeline.utilities.logger import log_event
+import pytz
 
-# === Find project root ===
-def find_project_root():
-    current = os.path.abspath(__file__)
-    while not os.path.exists(os.path.join(current, 'README.md')):
-        current = os.path.dirname(current)
-        if current == os.path.dirname(current):  # Reached root
-            raise FileNotFoundError("Could not locate project root (missing README.md)")
-    return current
+from scripts.etl.pipeline.utilities.logger import log_event
+from scripts.etl.pipeline.utilities.find_root import find_project_root
+from config.config import TIMEZONE
 
 PROJECT_ROOT = find_project_root()
+LONDON_TZ = pytz.timezone(TIMEZONE)
 
 # === Config ===
 LAT, LON = 51.47, -0.4543
@@ -44,6 +40,7 @@ def fetch_historical_window():
         "end_date": end.strftime("%Y-%m-%d"),
         "hourly": VARIABLES,
         "models": "ecmwf_ifs"
+        # timezone intentionally excluded to keep timestamps in UTC
     }
 
     response = openmeteo.weather_api(url, params=params)[0]
@@ -67,6 +64,7 @@ def fetch_forecast_prediction():
         "hourly": VARIABLES,
         "models": MODEL,
         "forecast_days": 5
+        # timezone intentionally excluded to keep timestamps in UTC
     }
 
     response = openmeteo.weather_api(url, params=params)[0]
@@ -87,8 +85,11 @@ def fetch_forecast_prediction():
 def save_to_csv(df, folder, prefix):
     os.makedirs(folder, exist_ok=True)
     df_clean = df.dropna()
-    now = datetime.now(timezone.utc).strftime("%Y%m%d_%H")
-    filename = f"{prefix}_{now}.csv"
+
+    # Human-facing time for file name (but data stays in UTC)
+    local_now = datetime.now(LONDON_TZ).strftime("%Y%m%d_%H")
+    filename = f"{prefix}_{local_now}.csv"
+
     path = os.path.join(folder, filename)
     df_clean.to_csv(path, index=False)
     log_event(f"Saved {prefix} CSV: {filename}", module="hourly_ingestion")

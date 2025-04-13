@@ -10,7 +10,11 @@ import openmeteo_requests
 import requests_cache
 from retry_requests import retry
 from datetime import datetime, timedelta, timezone
+import pytz
+
 from scripts.etl.pipeline.utilities.logger import log_event
+from scripts.etl.pipeline.utilities.find_root import find_project_root
+from config.config import TIMEZONE
 
 # Setup
 cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
@@ -21,9 +25,9 @@ openmeteo = openmeteo_requests.Client(session=retry_session)
 LAT, LON = 51.47, -0.4543
 VARIABLES = ["temperature_2m", "surface_pressure", "precipitation", "wind_speed_10m"]
 MODEL = "ecmwf_ifs"
-PROJECT_ROOT = os.path.dirname(os.path.dirname(find_project_root()))
+PROJECT_ROOT = find_project_root()
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "data", "raw", "historical")
-
+LONDON_TZ = pytz.timezone(TIMEZONE)
 
 def fetch_monthly_ifs(year, month):
     start = datetime(year, month, 1)
@@ -43,9 +47,12 @@ def fetch_monthly_ifs(year, month):
         response = openmeteo.weather_api("https://archive-api.open-meteo.com/v1/archive", params=params)[0]
         hourly = response.Hourly()
         return pd.DataFrame({
-            "date": pd.date_range(start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
-                                   end=pd.to_datetime(hourly.TimeEnd(), unit="s", utc=True),
-                                   freq=pd.Timedelta(seconds=hourly.Interval()), inclusive="left"),
+            "date": pd.date_range(
+                start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
+                end=pd.to_datetime(hourly.TimeEnd(), unit="s", utc=True),
+                freq=pd.Timedelta(seconds=hourly.Interval()),
+                inclusive="left"
+            ),
             **{var: hourly.Variables(i).ValuesAsNumpy() for i, var in enumerate(VARIABLES)}
         })
     except Exception as e:

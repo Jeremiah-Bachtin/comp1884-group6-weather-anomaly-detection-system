@@ -9,6 +9,7 @@ matplotlib
 pydrive2
 python-dotenv
 pytest
+pytz
 openmeteo-requests
 requests_cache
 retry_requests
