@@ -18,6 +18,11 @@ venv/
 env/
 Pipfile.lock
 
+# === Google API credentials ===
+client_secrets.json
+config/client_secrets.json
+credentials.json
+
 # === Jupyter Notebooks output ===
 *.nbconvert.ipynb
 *.out

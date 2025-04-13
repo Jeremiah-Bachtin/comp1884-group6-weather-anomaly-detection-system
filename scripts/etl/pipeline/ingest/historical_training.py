@@ -10,7 +10,7 @@ import openmeteo_requests
 import requests_cache
 from retry_requests import retry
 from datetime import datetime, timedelta, timezone
-from pipeline.utilities.logger import log_event
+from scripts.etl.pipeline.utilities.logger import log_event
 
 # API setup
 cache_session = requests_cache.CachedSession('.cache', expire_after=3600)

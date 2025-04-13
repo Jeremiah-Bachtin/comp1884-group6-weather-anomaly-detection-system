@@ -31,6 +31,9 @@ DRIVE_FOLDER_ANOMALY_FLAGS = os.getenv("DRIVE_FOLDER_ANOMALY_FLAGS")
 DRIVE_FOLDER_VISUALISATIONS = os.getenv("DRIVE_FOLDER_VISUALISATIONS")
 DRIVE_FOLDER_DASHBOARD_EXPORTS = os.getenv("DRIVE_FOLDER_DASHBOARD_EXPORTS")
 
+CLIENT_SECRETS_PATH = os.path.join(os.path.dirname(__file__), "..", os.getenv("CLIENT_SECRETS_PATH", "client_secrets.json"))
+CLIENT_SECRETS_PATH = os.path.abspath(CLIENT_SECRETS_PATH)
+
 # === Reference model names ===
 HISTORICAL_MODELS = {
     "ecmwf_ifs": "ECMWF IFS (9km)"

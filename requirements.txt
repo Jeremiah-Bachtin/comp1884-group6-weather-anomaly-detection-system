@@ -8,3 +8,7 @@ python-dotenv
 matplotlib
 pydrive2
 python-dotenv
+pytest
+openmeteo-requests
+requests_cache
+retry_requests
