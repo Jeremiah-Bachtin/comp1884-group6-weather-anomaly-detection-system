@@ -6,10 +6,9 @@ Logs timestamped messages into a daily file under data/logs.
 import os
 from datetime import datetime
 import pytz
+from scripts.etl.pipeline.utilities.find_root import find_project_root
 
-
-# Dynamically set project root
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+PROJECT_ROOT = find_project_root()
 LOG_DIR = os.path.join(PROJECT_ROOT, "data", "logs")
 LOG_FILE = os.path.join(LOG_DIR, "ingestion.log")
 
@@ -20,4 +19,3 @@ def log_event(message, module="general"):
     with open(LOG_FILE, "a") as f:
         f.write(f"[{timestamp}] [{module}] {message}\n")
     print(f"[LOG - {module}] {message}")
-

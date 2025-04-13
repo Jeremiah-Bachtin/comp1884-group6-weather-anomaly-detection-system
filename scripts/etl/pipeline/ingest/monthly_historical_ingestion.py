@@ -21,7 +21,7 @@ openmeteo = openmeteo_requests.Client(session=retry_session)
 LAT, LON = 51.47, -0.4543
 VARIABLES = ["temperature_2m", "surface_pressure", "precipitation", "wind_speed_10m"]
 MODEL = "ecmwf_ifs"
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(find_project_root()))
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "data", "raw", "historical")
 
 

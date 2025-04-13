@@ -6,29 +6,29 @@ __pycache__/
 *.pyo
 *.pyd
 *.so
-*.ipynb_checkpoints/
 
-# === Environment and dependency management ===
+# === Notebooks ===
+*.ipynb_checkpoints/
+*.nbconvert.ipynb
+*.out
+
+# === Environment and secrets ===
 .env
 *.env
+client_secrets.json
+credentials.json
 config/credentials.json
 config/config_local.py
+
+# === Virtual environments ===
 .venv/
 venv/
 env/
+
+# === Dependency mgmt ===
 Pipfile.lock
 
-# === Google API credentials ===
-client_secrets.json
-config/client_secrets.json
-credentials.json
-
-# === Jupyter Notebooks output ===
-*.nbconvert.ipynb
-*.out
-.ipynb_checkpoints/
-
-# === IDEs and editors ===
+# === IDEs ===
 .vscode/
 .idea/
 
@@ -50,25 +50,15 @@ logs/
 *.pkl
 *.sav
 
-# === Compiled outputs ===
+# === Outputs ===
 *.pdf
 *.png
 *.jpg
 *.zip
 
-# === Project-specific folders to ignore ===
-# Ignore all actual data and model outputs
+# === Project folders ===
 data/*
 !data/README.md
 
 outputs/*
 !outputs/README.md
-
-# Ignore all test files or staging artifacts in scripts
-scripts/etl/data/*
-scripts/modelling/models/*
-scripts/xai/results/*
-scripts/xai/experiments/*
-scripts/dashboard/output/*
-scripts/community/staging/*
-
