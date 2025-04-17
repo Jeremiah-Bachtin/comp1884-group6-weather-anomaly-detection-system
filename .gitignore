@@ -39,7 +39,6 @@ Pipfile.lock
 *.tmp
 *.bak
 .DS_Store
-logs/
 
 # === Model artifacts ===
 *.h5
@@ -59,7 +58,7 @@ logs/
 # === Project folders ===
 data/*
 !data/README.md
-
+data/logs/
 outputs/*
 !outputs/README.md
 

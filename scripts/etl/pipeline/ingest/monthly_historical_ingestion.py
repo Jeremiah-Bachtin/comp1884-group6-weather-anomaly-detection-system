@@ -11,10 +11,9 @@ import requests_cache
 from retry_requests import retry
 from datetime import datetime, timedelta, timezone
 import pytz
-
 from scripts.etl.pipeline.utilities.logger import log_event
 from scripts.etl.pipeline.utilities.find_root import find_project_root
-from config.config import TIMEZONE
+from config.config import TIMEZONE, LAT, LON, VARIABLES, MODEL_HISTORICAL
 
 # Setup
 cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
@@ -22,9 +21,7 @@ retry_session = retry(cache_session, retries=3, backoff_factor=0.3)
 openmeteo = openmeteo_requests.Client(session=retry_session)
 
 # Config
-LAT, LON = 51.47, -0.4543
-VARIABLES = ["temperature_2m", "surface_pressure", "precipitation", "wind_speed_10m"]
-MODEL = "ecmwf_ifs"
+
 PROJECT_ROOT = find_project_root()
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "data", "raw", "historical")
 LONDON_TZ = pytz.timezone(TIMEZONE)
@@ -40,7 +37,7 @@ def fetch_monthly_ifs(year, month):
         "start_date": start.strftime("%Y-%m-%d"),
         "end_date": end.strftime("%Y-%m-%d"),
         "hourly": VARIABLES,
-        "models": MODEL
+        "models": MODEL_HISTORICAL
     }
 
     try:

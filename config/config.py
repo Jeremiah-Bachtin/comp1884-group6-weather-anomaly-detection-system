@@ -9,10 +9,13 @@ LON = float(os.getenv("LON", -0.4543))
 TIMEZONE = os.getenv("TIMEZONE", "Europe/London")
 
 MODEL_FORECAST = os.getenv("MODEL_FORECAST", "ukmo_uk_deterministic_2km")
+MODEL_FORECAST_BACKUP = os.getenv("MODEL_FORECAST_BACKUP", "ukmo_seamless")
 MODEL_HISTORICAL = os.getenv("MODEL_HISTORICAL", "ecmwf_ifs")
 
 ROLLING_WINDOW_DAYS = int(os.getenv("ROLLING_WINDOW_DAYS", 60))
 FORECAST_TRIM_HOURS = int(os.getenv("FORECAST_TRIM_HOURS", 72))
+
+VARIABLES = os.getenv("VARIABLES", ["temperature_2m","surface_pressure","precipitation","wind_speed_10m"])
 
 # === Google Drive folder keys ===
 DRIVE_FOLDER_DATA = os.getenv("DRIVE_FOLDER_DATA")

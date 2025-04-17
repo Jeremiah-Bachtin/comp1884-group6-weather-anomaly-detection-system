@@ -8,14 +8,12 @@ import pytz
 
 from scripts.etl.pipeline.utilities.logger import log_event
 from scripts.etl.pipeline.utilities.find_root import find_project_root
-from config.config import TIMEZONE
+from config.config import TIMEZONE, LAT, LON, MODEL_FORECAST, MODEL_FORECAST_BACKUP, MODEL_HISTORICAL, VARIABLES
 
 PROJECT_ROOT = find_project_root()
 LONDON_TZ = pytz.timezone(TIMEZONE)
 
 # === Config ===
-LAT, LON = 51.47, -0.4543
-VARIABLES = ["temperature_2m", "surface_pressure", "precipitation", "wind_speed_10m"]
 MODEL = "ukmo_seamless"
 DATA_DIR = os.path.join(PROJECT_ROOT, "data", "raw")
 FORECAST_DIR = os.path.join(DATA_DIR, "forecast")
@@ -29,7 +27,9 @@ openmeteo = openmeteo_requests.Client(session=retry_session)
 # === Ingestion Logic ===
 def fetch_historical_window():
     end = (datetime.now(timezone.utc) - timedelta(days=2)).date()
-    start = end - timedelta(days=60)
+
+    start = end - timedelta(days=60) # SHOULDN'T THIS BE 58?
+
     log_event("Fetching 60-day historical window", module="hourly_ingestion")
 
     url = "https://archive-api.open-meteo.com/v1/archive"
@@ -39,7 +39,7 @@ def fetch_historical_window():
         "start_date": start.strftime("%Y-%m-%d"),
         "end_date": end.strftime("%Y-%m-%d"),
         "hourly": VARIABLES,
-        "models": "ecmwf_ifs"
+        "models": MODEL_HISTORICAL
         # timezone intentionally excluded to keep timestamps in UTC
     }
 
@@ -62,7 +62,9 @@ def fetch_forecast_prediction():
         "latitude": LAT,
         "longitude": LON,
         "hourly": VARIABLES,
-        "models": MODEL,
+
+        "models": [MODEL_FORECAST,MODEL_FORECAST_BACKUP], #CHECK IF UKMO 2km IS INVOKED FIRST AND THEN BACKED UP BY UKMO_Seamless
+
         "forecast_days": 5
         # timezone intentionally excluded to keep timestamps in UTC
     }
