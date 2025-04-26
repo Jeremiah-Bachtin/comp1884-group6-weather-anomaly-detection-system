@@ -1,6 +1,6 @@
 """
 Project-wide logger utility.
-Logs timestamped messages into a daily file under data/logs.
+Logs timestamped messages into a daily file under logs/.
 """
 
 import os
@@ -9,7 +9,7 @@ import pytz
 from scripts.etl.pipeline.utilities.find_root import find_project_root
 
 PROJECT_ROOT = find_project_root()
-LOG_DIR = os.path.join(PROJECT_ROOT, "data", "logs")
+LOG_DIR = os.path.join(PROJECT_ROOT, "logs")
 LOG_FILE = os.path.join(LOG_DIR, "ingestion.log")
 
 def log_event(message, module="general"):

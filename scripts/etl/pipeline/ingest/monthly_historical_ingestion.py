@@ -13,7 +13,7 @@ from datetime import datetime, timedelta, timezone
 import pytz
 from scripts.etl.pipeline.utilities.logger import log_event
 from scripts.etl.pipeline.utilities.find_root import find_project_root
-from config.config import TIMEZONE, LAT, LON, VARIABLES, MODEL_HISTORICAL
+from config.config import DATA_TZ, LAT, LON, VARIABLES, MODEL_HISTORICAL
 
 # Setup
 cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
@@ -24,7 +24,7 @@ openmeteo = openmeteo_requests.Client(session=retry_session)
 
 PROJECT_ROOT = find_project_root()
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "data", "raw", "historical")
-LONDON_TZ = pytz.timezone(TIMEZONE)
+# LONDON_TZ removed (was unused)
 
 def fetch_monthly_ifs(year, month):
     start = datetime(year, month, 1)
@@ -43,7 +43,7 @@ def fetch_monthly_ifs(year, month):
     try:
         response = openmeteo.weather_api("https://archive-api.open-meteo.com/v1/archive", params=params)[0]
         hourly = response.Hourly()
-        return pd.DataFrame({
+        df = pd.DataFrame({
             "date": pd.date_range(
                 start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
                 end=pd.to_datetime(hourly.TimeEnd(), unit="s", utc=True),
@@ -52,6 +52,8 @@ def fetch_monthly_ifs(year, month):
             ),
             **{var: hourly.Variables(i).ValuesAsNumpy() for i, var in enumerate(VARIABLES)}
         })
+        df["date"] = df["date"].dt.tz_convert(DATA_TZ)
+        return df
     except Exception as e:
         log_event(f"Failed for {year}-{month:02d}: {e}", module="training")
         return None
