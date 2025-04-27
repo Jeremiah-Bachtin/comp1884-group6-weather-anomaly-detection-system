@@ -38,6 +38,7 @@ Pipfile.lock
 *.db
 *.tmp
 *.bak
+.cache*
 .DS_Store
 
 # === Model artifacts ===
