@@ -6,8 +6,8 @@ accounting for DST effects.
 
 import os
 import pandas as pd
-from scripts.etl.pipeline.utilities.logger import log_event
-from scripts.etl.pipeline.utilities.find_root import find_project_root
+from utils.logger import log_event
+from utils.find_root import find_project_root
 from config.config import DATA_TZ
 
 # Setup

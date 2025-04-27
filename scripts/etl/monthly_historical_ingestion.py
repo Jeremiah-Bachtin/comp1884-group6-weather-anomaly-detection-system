@@ -10,8 +10,8 @@ import openmeteo_requests
 import requests_cache
 from retry_requests import retry
 from datetime import datetime, timedelta, timezone
-from scripts.etl.pipeline.utilities.logger import log_event
-from scripts.etl.pipeline.utilities.find_root import find_project_root
+from utils.logger import log_event
+from utils.find_root import find_project_root
 from config.config import DATA_TZ, LAT, LON, VARIABLES, MODEL_HISTORICAL
 
 # Setup

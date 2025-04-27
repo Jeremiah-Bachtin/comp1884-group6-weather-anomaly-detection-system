@@ -18,6 +18,11 @@ try:
 except (SyntaxError, ValueError):
     raise ValueError("VARIABLES in .env must be a valid Python list format.")
 
+# ===== Open-Meteo API ENDPOINTS ===========
+
+HISTORICAL_API_URL = os.getenv("HISTORICAL_API_URL", "https://archive-api.open-meteo.com/v1/archive")
+FORECAST_API_URL = os.getenv("FORECAST_API_URL", "https://forecast-api.open-meteo.com/v1/forecast")
+
 # ===== MODEL CONFIGURATION =====
 MODEL_HISTORICAL = os.getenv("MODEL_HISTORICAL", "ecmwf_ifs")
 MODEL_FORECAST = os.getenv("MODEL_FORECAST", "ukmo_seamless")

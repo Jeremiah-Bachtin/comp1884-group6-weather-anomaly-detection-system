@@ -3,16 +3,17 @@ import pandas as pd
 from datetime import datetime, timedelta
 from config.config import (LAT, LON, VARIABLES, MODEL_FORECAST, MODEL_HISTORICAL,
                             ROLLING_WINDOW_HOURS, FORECAST_BACKFILL_HOURS, FORECAST_TRIM_HOURS,
-                           FORECAST_PAST_DAYS, FORECAST_FUTURE_DAYS, DATA_TZ)
-from scripts.etl.pipeline.utilities.find_root import find_project_root
-from scripts.etl.pipeline.utilities.logger import log_event
-from scripts.etl.pipeline.utilities.fetch_dataframe import fetch_hourly_dataframe
+                           FORECAST_PAST_DAYS, FORECAST_FUTURE_DAYS, HISTORICAL_API_URL,
+                           FORECAST_API_URL,DATA_TZ)
+from utils.find_root import find_project_root
+from utils.logger import log_event
+from utils.fetch_dataframe import fetch_hourly_dataframe
 
 def fetch_historical_data(start_date, end_date):
     """Fetch historical data slice from Open-Meteo Archive API."""
     log_event(f"Fetching historical data from {start_date.date()} to {end_date.date()}", module="rolling_window_ingestion")
 
-    url = "https://archive-api.open-meteo.com/v1/archive"
+    url = HISTORICAL_API_URL
     params = {
         "latitude": LAT,
         "longitude": LON,
@@ -36,7 +37,7 @@ def fetch_forecast_data():
     """
     log_event("Fetching past 3 days + next 5 days forecast", module="forecast_ingestion")
 
-    url = "https://api.open-meteo.com/v1/forecast"
+    url = FORECAST_API_URL
     params = {
         "latitude": LAT,
         "longitude": LON,
