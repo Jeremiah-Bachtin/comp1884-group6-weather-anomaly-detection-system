@@ -20,8 +20,7 @@ except (SyntaxError, ValueError):
 
 # ===== MODEL CONFIGURATION =====
 MODEL_HISTORICAL = os.getenv("MODEL_HISTORICAL", "ecmwf_ifs")
-MODEL_FORECAST = os.getenv("MODEL_FORECAST", "ukmo_uk_deterministic_2km")
-MODEL_FORECAST_BACKUP = os.getenv("MODEL_FORECAST_BACKUP", "ukmo_seamless")
+MODEL_FORECAST = os.getenv("MODEL_FORECAST", "ukmo_seamless")
 
 # ===== TIMEZONE HANDLING =====
 DATA_TZ_STRING = os.getenv("DATA_TIMESTAMP_TZ", "Europe/London")
@@ -33,9 +32,11 @@ except pytz.UnknownTimeZoneError:
     raise ValueError(f"Invalid timezone in .env: {DATA_TZ_STRING} or {LOG_TZ_STRING}")
 
 # ===== WINDOW CONFIGURATION =====
-ROLLING_WINDOW_DAYS = int(os.getenv("ROLLING_WINDOW_DAYS", 60))
+ROLLING_WINDOW_HOURS = int(os.getenv("ROLLING_WINDOW_HOURS", 1440))
 FORECAST_BACKFILL_HOURS = int(os.getenv("FORECAST_BACKFILL_HOURS", 48))
 FORECAST_TRIM_HOURS = int(os.getenv("FORECAST_TRIM_HOURS", 72))
+FORECAST_PAST_DAYS = int(os.getenv("FORECAST_PAST_DAYS", 3))
+FORECAST_FUTURE_DAYS = int(os.getenv("FORECAST_FUTURE_DAYS", 5))
 
 # ===== GOOGLE DRIVE FOLDER IDs =====
 DRIVE_FOLDER_DATA = os.getenv("DRIVE_FOLDER_DATA")

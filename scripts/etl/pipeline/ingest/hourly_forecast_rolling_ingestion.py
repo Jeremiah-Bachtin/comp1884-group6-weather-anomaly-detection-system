@@ -1,121 +1,114 @@
 import os
 import pandas as pd
-import requests
 from datetime import datetime, timedelta
-from config.config import (LAT, LON, VARIABLES, MODEL_FORECAST, MODEL_FORECAST_BACKUP,
-                           FORECAST_TRIM_HOURS, FORECAST_BACKFILL_HOURS, ROLLING_WINDOW_DAYS, DATA_TZ)
+from config.config import (LAT, LON, VARIABLES, MODEL_FORECAST, MODEL_HISTORICAL,
+                            ROLLING_WINDOW_HOURS, FORECAST_BACKFILL_HOURS, FORECAST_TRIM_HOURS,
+                           FORECAST_PAST_DAYS, FORECAST_FUTURE_DAYS, DATA_TZ)
 from scripts.etl.pipeline.utilities.find_root import find_project_root
 from scripts.etl.pipeline.utilities.logger import log_event
 from scripts.etl.pipeline.utilities.fetch_dataframe import fetch_hourly_dataframe
 
+def fetch_historical_data(start_date, end_date):
+    """Fetch historical data slice from Open-Meteo Archive API."""
+    log_event(f"Fetching historical data from {start_date.date()} to {end_date.date()}", module="rolling_window_ingestion")
 
-def fetch_combined_forecast():
-    log_event("Requesting combined forecast (backfill + forward)", module="forecast_ingestion")
+    url = "https://archive-api.open-meteo.com/v1/archive"
+    params = {
+        "latitude": LAT,
+        "longitude": LON,
+        "start_date": start_date.strftime("%Y-%m-%d"),
+        "end_date": end_date.strftime("%Y-%m-%d"),
+        "hourly": ",".join(VARIABLES),
+        "models": MODEL_HISTORICAL,
+        "timezone": str(DATA_TZ.zone),
+    }
+
+    df = fetch_hourly_dataframe(url, params)
+    if df.empty:
+        log_event("Warning: Empty dataframe returned from Open-Meteo API.", module="rolling_window_ingestion")
+    return df
+
+def fetch_forecast_data():
+    """
+    Fetch forecast data from Open-Meteo.
+
+    Fetches past N days and next M days based on configuration settings.
+    """
+    log_event("Fetching past 3 days + next 5 days forecast", module="forecast_ingestion")
 
     url = "https://api.open-meteo.com/v1/forecast"
     params = {
         "latitude": LAT,
         "longitude": LON,
         "hourly": ",".join(VARIABLES),
-        "models": f"{MODEL_FORECAST},{MODEL_FORECAST_BACKUP}",
-        "forecast_hours": FORECAST_TRIM_HOURS,
-        "past_days": FORECAST_BACKFILL_HOURS // 24,
-        "timezone": str(DATA_TZ.zone)
+        "models": MODEL_FORECAST,
+        "past_days": FORECAST_PAST_DAYS,
+        "forecast_days": FORECAST_FUTURE_DAYS,
+        "timezone": str(DATA_TZ.zone),
     }
 
     df = fetch_hourly_dataframe(url, params)
+    if df.empty:
+        log_event("Warning: Empty dataframe returned from Open-Meteo API.", module="forecast_ingestion")
+    return df
 
-    now = datetime.now(DATA_TZ).replace(minute=0, second=0, microsecond=0)
+def save_forecast_csv(forecast_df, anchor_time):
+    """Save trimmed 72-hour forecast starting from anchor_time."""
+    forecast_slice = forecast_df[(forecast_df["date"] >= anchor_time) & (forecast_df["date"] < anchor_time + timedelta(hours=FORECAST_TRIM_HOURS))].copy()
 
-    # Split forecast into two parts: backfill (past 48h) and forecast (next 72h)
-    backfill_start = now - timedelta(hours=FORECAST_BACKFILL_HOURS)
-    backfill_end = now
-    forecast_end = now + timedelta(hours=FORECAST_TRIM_HOURS)
-
-    backfill_df = df[(df["date"] >= backfill_start) & (df["date"] < backfill_end)].copy()
-    forecast_df = df[(df["date"] >= now) & (df["date"] < forecast_end)].copy()
-
-    # Validate forecast_df length
-    expected_forecast_rows = FORECAST_TRIM_HOURS
-    if len(forecast_df) != expected_forecast_rows:
-        log_event(f"Warning: forecast_df has {len(forecast_df)} rows, expected {expected_forecast_rows}.", module="forecast_ingestion")
-
-    return backfill_df, forecast_df
-
-
-def save_forecast_csv(df):
-    timestamp = datetime.now(DATA_TZ).strftime("%Y%m%d_%H")
-    filename = f"forecast_{timestamp}.csv"
+    timestamp = anchor_time.strftime("%Y%m%d_%H")
+    filename = f"forecast_rolling_72h_from_{timestamp}.csv"
     output_dir = os.path.join(find_project_root(), "data", "raw", "forecast")
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, filename)
 
-    if os.path.exists(output_path):
-        log_event(f"{filename} already exists, skipping save.", module="forecast_ingestion")
-    else:
-        df.to_csv(output_path, index=False)
-        log_event(f"Saved {filename} with {len(df)} rows.", module="forecast_ingestion")
+    forecast_slice.to_csv(output_path, index=False)
+    log_event(f"Saved 72h forecast to {filename} with {len(forecast_slice)} rows.", module="forecast_ingestion")
 
+def save_rolling_window(merged_df, anchor_time):
+    """Save strict 1440-hour rolling window up to anchor_time."""
+    start_time = anchor_time - timedelta(hours=ROLLING_WINDOW_HOURS)
 
-def load_historical_baseline():
-    log_event("Requesting 58-day historical data from Open-Meteo API", module="forecast_ingestion")
+    rolling_df = merged_df[(merged_df["date"] > start_time) & (merged_df["date"] <= anchor_time)].copy()
 
-    url = "https://archive-api.open-meteo.com/v1/archive"
-    now = datetime.now(DATA_TZ).replace(minute=0, second=0, microsecond=0)
-    start_date = (now - timedelta(days=ROLLING_WINDOW_DAYS)).strftime("%Y-%m-%d")
-    end_date = (now - timedelta(hours=FORECAST_BACKFILL_HOURS)).strftime("%Y-%m-%d")
+    expected_rows = ROLLING_WINDOW_HOURS
+    actual_rows = len(rolling_df)
 
-    params = {
-        "latitude": LAT,
-        "longitude": LON,
-        "start_date": start_date,
-        "end_date": end_date,
-        "hourly": ",".join(VARIABLES),
-        "models": MODEL_FORECAST,
-        "timezone": str(DATA_TZ.zone)
-    }
+    if abs(actual_rows - expected_rows) > 2:
+        log_event(f"Rolling window has {actual_rows} rows, expected {expected_rows}.", module="rolling_window_ingestion")
 
-    df = fetch_hourly_dataframe(url, params)
-
-    return df
-
-def save_rolling_window(df):
-    # Check rolling window validity
-    actual_start = df["date"].min()
-    actual_end = df["date"].max()
-    duration_hours = (actual_end - actual_start) / pd.Timedelta(hours=1)
-
-    expected_hours = (ROLLING_WINDOW_DAYS - 2) * 24 + FORECAST_BACKFILL_HOURS
-
-    if abs(duration_hours - expected_hours) > 1:
-        log_event(f"Warning: rolling window spans {duration_hours:.1f} hours, expected {expected_hours}.", module="forecast_ingestion")
-
-    duplicates = df.duplicated(subset="date").sum()
-    if duplicates > 0:
-        log_event(f"Warning: rolling window contains {duplicates} duplicated timestamps.", module="forecast_ingestion")
-
-    timestamp = datetime.now(DATA_TZ).strftime("%Y%m%d_%H")
-    filename = f"baseline_{timestamp}.csv"
+    timestamp = anchor_time.strftime("%Y%m%d_%H")
+    filename = f"baseline_rolling_1440h_until_{timestamp}.csv"
     output_dir = os.path.join(find_project_root(), "data", "processed", "rolling_window")
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, filename)
 
-    df.to_csv(output_path, index=False)
-    log_event(f"Saved rolling window to {filename} with {len(df)} rows.", module="forecast_ingestion")
-
+    rolling_df.to_csv(output_path, index=False)
+    log_event(f"Saved rolling window to {filename} with {len(rolling_df)} rows.", module="rolling_window_ingestion")
 
 def main():
-    log_event("Starting forecast ingestion and rolling window generation", module="forecast_ingestion")
+    log_event("Starting rolling window generation anchored at the latest full hour.", module="rolling_window_ingestion")
 
-    backfill_df, forecast_df = fetch_combined_forecast()
-    save_forecast_csv(forecast_df)
+    now = datetime.now(DATA_TZ).replace(minute=0, second=0, microsecond=0)
+    anchor_time = now  # << Now is anchor time!
 
-    historical_df = load_historical_baseline()
-    rolling_window_df = pd.concat([historical_df, backfill_df], ignore_index=True)
-    save_rolling_window(rolling_window_df)
+    # Fetch historical slice (60 days back to 2 days ago)
+    hist_start = anchor_time - timedelta(hours=ROLLING_WINDOW_HOURS)
+    hist_end = anchor_time - timedelta(hours=FORECAST_BACKFILL_HOURS)
+    historical_df = fetch_historical_data(hist_start, hist_end)
 
-    log_event("Forecast ingestion and rolling window complete", module="forecast_ingestion")
+    # Fetch forecast slice (past 3 days + future 5 days)
+    forecast_df = fetch_forecast_data()
 
+    # Merge (historical first, then forecast)
+    merged_df = pd.concat([historical_df, forecast_df]).sort_values("date")
+    merged_df = merged_df.drop_duplicates(subset="date", keep="first")  # << Prefer historical values
+
+    # Save outputs
+    save_forecast_csv(merged_df, anchor_time)
+    save_rolling_window(merged_df, anchor_time)
+
+    log_event("Completed 72-hour forecast and 1440-hour rolling window ingestion.", module="forecast_ingestion")
 
 if __name__ == "__main__":
     main()
