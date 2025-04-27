@@ -1,6 +1,6 @@
 """
-Monthly ingestion of IFS historical data from Open-Meteo
-Builds monthly CSVs from Jan 2017 to two days before current date
+Monthly ingestion of IFS historical data from Open-Meteo.
+Builds monthly CSVs from Jan 2017 to the most recent full month
 """
 
 import os
@@ -10,7 +10,6 @@ import openmeteo_requests
 import requests_cache
 from retry_requests import retry
 from datetime import datetime, timedelta, timezone
-import pytz
 from scripts.etl.pipeline.utilities.logger import log_event
 from scripts.etl.pipeline.utilities.find_root import find_project_root
 from config.config import DATA_TZ, LAT, LON, VARIABLES, MODEL_HISTORICAL
@@ -20,16 +19,16 @@ cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
 retry_session = retry(cache_session, retries=3, backoff_factor=0.3)
 openmeteo = openmeteo_requests.Client(session=retry_session)
 
-# Config
-
 PROJECT_ROOT = find_project_root()
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "data", "raw", "historical")
-# LONDON_TZ removed (was unused)
 
+# Fetch one month's historical data
 def fetch_monthly_ifs(year, month):
     start = datetime(year, month, 1)
-    end = start + timedelta(days=calendar.monthrange(year, month)[1] - 1)
-    log_event(f"Requesting IFS data for {year}-{month:02d}", module="training")
+    days_in_month = calendar.monthrange(year, month)[1]
+    end = start + timedelta(days=days_in_month - 1)
+
+    log_event(f"Fetching historical data for {year}-{month:02d}", module="historical_ingestion")
 
     params = {
         "latitude": LAT,
@@ -43,6 +42,7 @@ def fetch_monthly_ifs(year, month):
     try:
         response = openmeteo.weather_api("https://archive-api.open-meteo.com/v1/archive", params=params)[0]
         hourly = response.Hourly()
+
         df = pd.DataFrame({
             "date": pd.date_range(
                 start=pd.to_datetime(hourly.Time(), unit="s", utc=True),
@@ -52,14 +52,21 @@ def fetch_monthly_ifs(year, month):
             ),
             **{var: hourly.Variables(i).ValuesAsNumpy() for i, var in enumerate(VARIABLES)}
         })
+
         df["date"] = df["date"].dt.tz_convert(DATA_TZ)
+
+        # Optional: re-order columns if needed
+        df = df[["date"] + VARIABLES]
+
         return df
+
     except Exception as e:
-        log_event(f"Failed for {year}-{month:02d}: {e}", module="training")
+        log_event(f"Failed for {year}-{month:02d}: {e}", module="historical_ingestion")
         return None
 
+# Main ingestion
 def run_monthly_ingestion():
-    log_event("Started monthly IFS ingestion.", module="training")
+    log_event("Started monthly historical ingestion.", module="historical_ingestion")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     cutoff = datetime.now(timezone.utc) - timedelta(days=2)
     start = pd.Timestamp("2017-01-01", tz="UTC")
@@ -72,13 +79,10 @@ def run_monthly_ingestion():
             df = fetch_monthly_ifs(year, month)
             if df is not None:
                 df.to_csv(path, index=False)
-                log_event(f"Saved monthly data: IFS_{year}_{month:02d}.csv", module="training")
+                log_event(f"Saved monthly data: IFS_{year}_{month:02d}.csv", module="historical_ingestion")
         else:
-            log_event(f"Skipped IFS_{year}_{month:02d}.csv – already exists.", module="training")
+            log_event(f"Skipped IFS_{year}_{month:02d}.csv – already exists.", module="historical_ingestion")
 
         start = start + pd.DateOffset(months=1)
 
-    log_event("Completed monthly historical ingestion.", module="training")
-
-if __name__ == "__main__":
-    run_monthly_ingestion()
+    log_event("Completed monthly historical ingestion.", module="historical_ingestion")
