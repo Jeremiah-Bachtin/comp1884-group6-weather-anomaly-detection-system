@@ -58,7 +58,12 @@ def fetch_monthly_ifs(year, month):
 
         df["date"] = df["date"].dt.tz_convert(DATA_TZ)
 
-        # Optional: re-order columns if needed
+        # Strictly keep timestamps inside the month
+        month_start = pd.Timestamp(year, month, 1, tz="UTC").tz_convert(DATA_TZ)
+        month_end = (month_start + pd.DateOffset(months=1))
+        df = df[(df["date"] >= month_start) & (df["date"] < month_end)]
+
+        # Optional: re-order columns
         df = df[["date"] + VARIABLES]
 
         return df
@@ -89,3 +94,6 @@ def run_monthly_ingestion():
         start = start + pd.DateOffset(months=1)
 
     log_event("Completed monthly historical ingestion.", module="historical_ingestion")
+
+if __name__ == "__main__":
+    run_monthly_ingestion()
