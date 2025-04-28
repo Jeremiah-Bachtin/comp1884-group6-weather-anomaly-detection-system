@@ -58,7 +58,7 @@ def save_forecast_csv(forecast_df, anchor_time):
     forecast_slice = forecast_df[(forecast_df["date"] >= anchor_time) & (forecast_df["date"] < anchor_time + timedelta(hours=FORECAST_TRIM_HOURS))].copy()
 
     timestamp = anchor_time.strftime("%Y%m%d_%H")
-    filename = f"forecast_rolling_72h_from_{timestamp}.csv"
+    filename = f"forecast_72h_from_{timestamp}.csv"
     output_dir = os.path.join(find_project_root(), "data", "raw", "forecast")
     os.makedirs(output_dir, exist_ok=True)
     output_path = os.path.join(output_dir, filename)
