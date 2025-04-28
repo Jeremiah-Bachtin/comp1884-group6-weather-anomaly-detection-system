@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from config.config import (LAT, LON, VARIABLES, MODEL_FORECAST, MODEL_HISTORICAL,
                             ROLLING_WINDOW_HOURS, FORECAST_BACKFILL_HOURS, FORECAST_TRIM_HOURS,
                            FORECAST_PAST_DAYS, FORECAST_FUTURE_DAYS, HISTORICAL_API_URL,
-                           FORECAST_API_URL,DATA_TZ)
+                           FORECAST_API_URL,DATA_TZ, ANCHOR_TIME)
 from utils.find_root import find_project_root
 from utils.logger import log_event
 from utils.fetch_dataframe import fetch_hourly_dataframe
@@ -90,8 +90,7 @@ def save_rolling_window(merged_df, anchor_time):
 def main():
     log_event("Starting rolling window generation anchored at the latest full hour.", module="rolling_window_ingestion")
 
-    now = datetime.now(DATA_TZ).replace(minute=0, second=0, microsecond=0)
-    anchor_time = now  # << Now is anchor time!
+    anchor_time = ANCHOR_TIME
 
     # Fetch historical slice (60 days back to 2 days ago)
     hist_start = anchor_time - timedelta(hours=ROLLING_WINDOW_HOURS)

@@ -2,6 +2,7 @@ import os
 import ast
 from dotenv import load_dotenv
 import pytz
+from datetime import datetime, timedelta
 
 # Load variables from .env
 load_dotenv()
@@ -35,6 +36,17 @@ try:
     LOG_TZ = pytz.timezone(LOG_TZ_STRING)
 except pytz.UnknownTimeZoneError:
     raise ValueError(f"Invalid timezone in .env: {DATA_TZ_STRING} or {LOG_TZ_STRING}")
+
+# ===== ANCHOR TIME CONFIGURATION =====
+try:
+    ANCHOR_TIME_STR = os.getenv("ANCHOR_TIME")  # Get value from .env
+    if ANCHOR_TIME_STR:
+        ANCHOR_TIME = datetime.fromisoformat(ANCHOR_TIME_STR).astimezone(DATA_TZ)
+    else:
+        # Default to now - 1 hour in the specified timezone
+        ANCHOR_TIME = (datetime.now(DATA_TZ) - timedelta(hours=1))
+except ValueError:
+    raise ValueError("Invalid ANCHOR_TIME format in .env. Use ISO format: 'YYYY-MM-DDTHH:MM:SS'.")
 
 # ===== WINDOW CONFIGURATION =====
 ROLLING_WINDOW_HOURS = int(os.getenv("ROLLING_WINDOW_HOURS", 1440))
