@@ -57,7 +57,7 @@ Pipfile.lock
 *.zip
 
 # === Project folders ===
-# data/*
+data/*
 !data/README.md
 data/logs/
 outputs/*

@@ -49,6 +49,29 @@ COMP1884-Group6-Codebase-Complete/
 
 ---
 
+## Currently Implemented Key Features
+
+### **Historical Data Collection**
+- Retrieves historical weather data starting from January 2017, broken down monthly.
+- Provides hourly weather variables such as temperature, precipitation, and wind speed based on configured coordinates (default: Greater London).
+- **Important Note**: The raw historical data **does not handle missing timestamps or duplicate entries**. These are addressed later in the merging process.
+
+### **Merging Historical Data**
+- Combines monthly historical files into a single, merged dataset for the entire period.
+- Handles **Daylight Savings Time (DST) anomalies**:
+    - **Duplicated timestamps** (e.g., from October DST changes) are logged and retained.
+    - **Missing timestamps** (e.g., from March DST changes) are identified and logged.
+
+- Produces a clean, consistent historical dataset ready for analysis or model training.
+
+### **Forecast Data Collection**
+- Fetches forecast data to supplement recent missing data:
+    - Covers **past 3 days** and **next 5 days** from the current date.
+    - Ensures gaps for the last 2 days are backfilled when historical data is unavailable.
+
+- Saves trimmed **72-hour forecasts** starting from a configurable anchor time.
+
+
 ## 🚀 Quickstart (Local)
 
 ```bash
