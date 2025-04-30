@@ -69,4 +69,3 @@ scripts/devtools/tests/*.json
 scripts/devtools/tests/temp_*.py
 scripts/devtools/tests/sandbox_*.py
 scripts/devtools/tests/*.txt
-
