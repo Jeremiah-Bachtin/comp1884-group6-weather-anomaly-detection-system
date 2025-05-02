@@ -43,8 +43,8 @@ try:
     if ANCHOR_TIME_STR:
         ANCHOR_TIME = datetime.fromisoformat(ANCHOR_TIME_STR).astimezone(DATA_TZ)
     else:
-        # Default to now - 1 hour in the specified timezone
-        ANCHOR_TIME = (datetime.now(DATA_TZ) - timedelta(hours=1))
+        # Default to now in the specified timezone
+        ANCHOR_TIME = datetime.now(DATA_TZ).replace(minute=0, second=0, microsecond=0)
 except ValueError:
     raise ValueError("Invalid ANCHOR_TIME format in .env. Use ISO format: 'YYYY-MM-DDTHH:MM:SS'.")
 
@@ -54,12 +54,15 @@ FORECAST_BACKFILL_HOURS = int(os.getenv("FORECAST_BACKFILL_HOURS", 48))
 FORECAST_TRIM_HOURS = int(os.getenv("FORECAST_TRIM_HOURS", 72))
 FORECAST_PAST_DAYS = int(os.getenv("FORECAST_PAST_DAYS", 3))
 FORECAST_FUTURE_DAYS = int(os.getenv("FORECAST_FUTURE_DAYS", 5))
+START_YEAR = int(os.getenv("START_YEAR", 2017))
+START_MONTH = int(os.getenv("START_MONTH", 1))
 
 # ===== GOOGLE DRIVE FOLDER IDs =====
 DRIVE_FOLDER_DATA = os.getenv("DRIVE_FOLDER_DATA")
 DRIVE_FOLDER_PROCESSED = os.getenv("DRIVE_FOLDER_PROCESSED")
 DRIVE_FOLDER_ML_INPUT = os.getenv("DRIVE_FOLDER_ML_INPUT")
 DRIVE_FOLDER_ROLLING_WINDOW = os.getenv("DRIVE_FOLDER_ROLLING_WINDOW")
+DRIVE_FOLDER_HISTORICAL_MERGED = os.getenv("DRIVE_FOLDER_HISTORICAL_MERGED")
 DRIVE_FOLDER_RAW = os.getenv("DRIVE_FOLDER_RAW")
 DRIVE_FOLDER_HISTORICAL = os.getenv("DRIVE_FOLDER_HISTORICAL")
 DRIVE_FOLDER_FORECAST = os.getenv("DRIVE_FOLDER_FORECAST")

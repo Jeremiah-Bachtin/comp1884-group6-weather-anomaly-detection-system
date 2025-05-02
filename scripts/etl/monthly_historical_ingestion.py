@@ -12,7 +12,8 @@ from retry_requests import retry
 from datetime import datetime, timedelta, timezone
 from utils.logger import log_event
 from utils.find_root import find_project_root
-from config.config import DATA_TZ, LAT, LON, VARIABLES, MODEL_HISTORICAL
+from config.config import (DATA_TZ, LAT, LON, VARIABLES, MODEL_HISTORICAL,
+                           HISTORICAL_API_URL, START_YEAR, START_MONTH)
 
 # Setup
 cache_session = requests_cache.CachedSession('.cache', expire_after=3600)
@@ -43,7 +44,7 @@ def fetch_monthly_ifs(year, month):
     }
 
     try:
-        response = openmeteo.weather_api("https://archive-api.open-meteo.com/v1/archive", params=params)[0]
+        response = openmeteo.weather_api(HISTORICAL_API_URL, params=params)[0]
         hourly = response.Hourly()
 
         df = pd.DataFrame({
@@ -77,7 +78,7 @@ def run_monthly_ingestion():
     log_event("Started monthly historical ingestion.", module="historical_ingestion")
     os.makedirs(OUTPUT_DIR, exist_ok=True)
     cutoff = datetime.now(timezone.utc) - timedelta(days=2)
-    start = pd.Timestamp("2017-01-01", tz="UTC")
+    start = pd.Timestamp(f"{START_YEAR}-{START_MONTH:02d}-01", tz="UTC")
 
     while start < cutoff:
         year, month = start.year, start.month

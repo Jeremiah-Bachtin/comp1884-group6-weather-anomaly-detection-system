@@ -18,7 +18,7 @@ __pycache__/
 client_secrets.json
 credentials.json
 config/credentials.json
-config/config_local.py
+config/_local.py
 
 # === Virtual environments ===
 .venv/
@@ -59,7 +59,6 @@ Pipfile.lock
 # === Project folders ===
 data/*
 !data/README.md
-data/logs/
 outputs/*
 !outputs/README.md
 

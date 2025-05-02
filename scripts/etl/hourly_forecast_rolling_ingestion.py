@@ -55,7 +55,10 @@ def fetch_forecast_data():
 
 def save_forecast_csv(forecast_df, anchor_time):
     """Save trimmed 72-hour forecast starting from anchor_time."""
-    forecast_slice = forecast_df[(forecast_df["date"] >= anchor_time) & (forecast_df["date"] < anchor_time + timedelta(hours=FORECAST_TRIM_HOURS))].copy()
+    forecast_slice = forecast_df[
+       (forecast_df["date"] >= anchor_time) &
+       (forecast_df["date"] < anchor_time + timedelta(hours=FORECAST_TRIM_HOURS))
+   ].copy()
 
     timestamp = anchor_time.strftime("%Y%m%d_%H")
     filename = f"forecast_72h_from_{timestamp}.csv"
@@ -67,10 +70,11 @@ def save_forecast_csv(forecast_df, anchor_time):
     log_event(f"Saved 72h forecast to {filename} with {len(forecast_slice)} rows.", module="forecast_ingestion")
 
 def save_rolling_window(merged_df, anchor_time):
-    """Save strict 1440-hour rolling window up to anchor_time."""
-    start_time = anchor_time - timedelta(hours=ROLLING_WINDOW_HOURS)
+    """Save strict 1440-hour rolling window up to anchor_time - 1."""
+    rolling_start = anchor_time - timedelta(hours=ROLLING_WINDOW_HOURS)
+    rolling_end = anchor_time
 
-    rolling_df = merged_df[(merged_df["date"] > start_time) & (merged_df["date"] <= anchor_time)].copy()
+    rolling_df = merged_df[(merged_df["date"] >= rolling_start) & (merged_df["date"] < rolling_end)].copy()
 
     expected_rows = ROLLING_WINDOW_HOURS
     actual_rows = len(rolling_df)
@@ -93,7 +97,7 @@ def main():
     anchor_time = ANCHOR_TIME
 
     # Fetch historical slice (60 days back to 2 days ago)
-    hist_start = anchor_time - timedelta(hours=ROLLING_WINDOW_HOURS)
+    hist_start = anchor_time - timedelta(hours=ROLLING_WINDOW_HOURS + 1)
     hist_end = anchor_time - timedelta(hours=FORECAST_BACKFILL_HOURS)
     historical_df = fetch_historical_data(hist_start, hist_end)
 
