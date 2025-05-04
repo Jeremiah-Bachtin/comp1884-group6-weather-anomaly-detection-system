@@ -17,7 +17,7 @@ MERGED_PATH = os.path.join(PROJECT_ROOT, "data", "processed", "merged_historical
 
 def merge_historical():
     log_event("Started merging historical data.", module="historical_merge")
-    
+
     # Ensure the output directory exists
     project_root = find_project_root()
     output_dir = os.path.join(project_root, "data", "processed", "historical_merged")
@@ -29,12 +29,14 @@ def merge_historical():
     # Counters
     total_duplicates = 0
     total_missing = 0
+    total_nans = 0
 
     for file in files:
         path = os.path.join(HISTORICAL_DIR, file)
         df = pd.read_csv(path, parse_dates=["date"])
         df["date"] = pd.to_datetime(df["date"], utc=True).dt.tz_convert(DATA_TZ)
 
+        # Check for duplicated timestamps
         duplicated = df.duplicated(subset=["date"]).sum()
         if duplicated > 0:
             log_event(
@@ -43,6 +45,7 @@ def merge_historical():
             )
             total_duplicates += duplicated
 
+        # Check for missing timestamps (based on expected range)
         expected_hours = int((df["date"].max() - df["date"].min()) / pd.Timedelta(hours=1)) + 1
         actual_hours = df["date"].shape[0]
         if expected_hours != actual_hours:
@@ -52,6 +55,15 @@ def merge_historical():
                 module="historical_merge"
             )
             total_missing += missing
+
+        # Check for NaNs
+        if df.isna().any().any():
+            count_nans = df.isna().sum().sum()
+            log_event(
+                f"WARNING: {count_nans} missing values detected in {file}.",
+                module="historical_merge"
+            )
+            total_nans += count_nans
 
         all_dfs.append(df)
 
@@ -72,6 +84,7 @@ def merge_historical():
     # Final DST anomaly summary
     log_event(f"SUMMARY: Total duplicated timestamps across all files: {total_duplicates}", module="historical_merge")
     log_event(f"SUMMARY: Total missing timestamps across all files: {total_missing}", module="historical_merge")
+    log_event(f"SUMMARY: Total missing values (NaNs) across all files: {total_nans}", module="historical_merge")
     log_event(f"Completed historical merge and saved to {output_path}.", module="historical_merge")
 
 if __name__ == "__main__":
