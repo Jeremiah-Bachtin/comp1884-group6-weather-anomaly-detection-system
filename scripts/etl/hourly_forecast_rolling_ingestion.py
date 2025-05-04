@@ -25,6 +25,8 @@ def fetch_historical_data(start_date, end_date):
     }
 
     df = fetch_hourly_dataframe(url, params)
+    if df.isna().any().any():
+        log_event("Warning: Missing values detected in historical data.", module="rolling_window_ingestion")
     if df.empty:
         log_event("Warning: Empty dataframe returned from Open-Meteo API.", module="rolling_window_ingestion")
     return df
@@ -49,6 +51,8 @@ def fetch_forecast_data():
     }
 
     df = fetch_hourly_dataframe(url, params)
+    if df.isna().any().any():
+        log_event("Warning: Missing values detected in forecast data.", module="forecast_ingestion")
     if df.empty:
         log_event("Warning: Empty dataframe returned from Open-Meteo API.", module="forecast_ingestion")
     return df
@@ -79,8 +83,8 @@ def save_rolling_window(merged_df, anchor_time):
     expected_rows = ROLLING_WINDOW_HOURS
     actual_rows = len(rolling_df)
 
-    if abs(actual_rows - expected_rows) > 2:
-        log_event(f"Rolling window has {actual_rows} rows, expected {expected_rows}.", module="rolling_window_ingestion")
+    if abs(actual_rows - expected_rows) > 1:
+        log_event(f"Rolling window has {actual_rows} rows, expected {expected_rows}. There is a difference of {actual_rows-expected_rows}.", module="rolling_window_ingestion")
 
     timestamp = anchor_time.strftime("%Y%m%d_%H")
     filename = f"baseline_rolling_1440h_until_{timestamp}.csv"
@@ -107,6 +111,10 @@ def main():
     # Merge (historical first, then forecast)
     merged_df = pd.concat([historical_df, forecast_df]).sort_values("date")
     merged_df = merged_df.drop_duplicates(subset="date", keep="first")  # << Prefer historical values
+
+    # Check for missing values in merged data
+    if merged_df.isna().any().any():
+        log_event("Warning: Missing values found in merged_df (forecast + historical).", module="data_integrity")
 
     # Save outputs
     save_forecast_csv(merged_df, anchor_time)

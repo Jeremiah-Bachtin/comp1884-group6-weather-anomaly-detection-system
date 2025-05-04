@@ -21,10 +21,8 @@ retry_session = retry(cache_session, retries=3, backoff_factor=0.3)
 openmeteo = openmeteo_requests.Client(session=retry_session)
 
 # Config
-
 PROJECT_ROOT = find_project_root()
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "data", "raw", "historical")
-# LONDON_TZ removed (was unused)
 
 # Fetch one month's historical data
 def fetch_monthly_ifs(year, month):
@@ -66,6 +64,10 @@ def fetch_monthly_ifs(year, month):
 
         # Optional: re-order columns
         df = df[["date"] + VARIABLES]
+
+        # Check for missing values
+        if df.isna().any().any():
+            log_event(f"Warning: Missing values detected in IFS data for {year}-{month:02d}.", module="historical_ingestion")
 
         return df
 
