@@ -1,6 +1,6 @@
 import requests
 import pandas as pd
-from config.config import DATA_TZ
+from config.config import TIME_ZONE
 
 def fetch_hourly_dataframe(url, params):
     response = requests.get(url, params=params)
@@ -9,6 +9,9 @@ def fetch_hourly_dataframe(url, params):
 
     df = pd.DataFrame(data["hourly"])
     df.rename(columns={"time": "date"}, inplace=True)
-    df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(DATA_TZ, nonexistent='shift_forward')
-    df = df.drop_duplicates(subset="date", keep="first")
+
+    # Localise using TIME_ZONE
+    df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(TIME_ZONE, nonexistent="shift_forward")
+
+    df.drop_duplicates(subset="date", keep="first", inplace=True)
     return df
