@@ -28,23 +28,21 @@ FORECAST_API_URL = os.getenv("FORECAST_API_URL", "https://forecast-api.open-mete
 MODEL_HISTORICAL = os.getenv("MODEL_HISTORICAL", "ecmwf_ifs")
 MODEL_FORECAST = os.getenv("MODEL_FORECAST", "ukmo_seamless")
 
-# ===== TIMEZONE HANDLING =====
-DATA_TZ_STRING = os.getenv("DATA_TIMESTAMP_TZ", "Europe/London")
-LOG_TZ_STRING = os.getenv("LOG_TIMESTAMP_TZ", "Europe/London")
+# ===== TIMEZONE CONFIGURATION =====
+TIME_ZONE_STRING = os.getenv("TIME_ZONE", "Europe/London")
 try:
-    DATA_TZ = pytz.timezone(DATA_TZ_STRING)
-    LOG_TZ = pytz.timezone(LOG_TZ_STRING)
+    TIME_ZONE = pytz.timezone(TIME_ZONE_STRING)
 except pytz.UnknownTimeZoneError:
-    raise ValueError(f"Invalid timezone in .env: {DATA_TZ_STRING} or {LOG_TZ_STRING}")
+    raise ValueError(f"Invalid timezone in .env: {TIME_ZONE_STRING}")
 
 # ===== ANCHOR TIME CONFIGURATION =====
 try:
     ANCHOR_TIME_STR = os.getenv("ANCHOR_TIME")  # Get value from .env
     if ANCHOR_TIME_STR:
-        ANCHOR_TIME = datetime.fromisoformat(ANCHOR_TIME_STR).astimezone(DATA_TZ)
+        ANCHOR_TIME = datetime.fromisoformat(ANCHOR_TIME_STR).astimezone(TIME_ZONE)
     else:
         # Default to now in the specified timezone
-        ANCHOR_TIME = datetime.now(DATA_TZ).replace(minute=0, second=0, microsecond=0)
+        ANCHOR_TIME = datetime.now(TIME_ZONE).replace(minute=0, second=0, microsecond=0)
 except ValueError:
     raise ValueError("Invalid ANCHOR_TIME format in .env. Use ISO format: 'YYYY-MM-DDTHH:MM:SS'.")
 
