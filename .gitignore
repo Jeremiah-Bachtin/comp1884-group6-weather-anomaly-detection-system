@@ -34,12 +34,18 @@ Pipfile.lock
 
 # === Logs and cache ===
 *.log
+*.out
+*.err
 *.sqlite
 *.db
 *.tmp
 *.bak
 .cache*
 .DS_Store
+.pytest_cache/
+.mypy_cache/
+Thumbs.db
+Desktop.ini
 
 # === Model artifacts ===
 *.h5
@@ -61,10 +67,3 @@ data/*
 !data/README.md
 outputs/*
 !outputs/README.md
-
-# === Devtools test artifacts ===
-scripts/devtools/tests/*.csv
-scripts/devtools/tests/*.json
-scripts/devtools/tests/temp_*.py
-scripts/devtools/tests/sandbox_*.py
-scripts/devtools/tests/*.txt
