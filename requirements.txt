@@ -13,3 +13,4 @@ pytz
 openmeteo-requests
 requests_cache
 retry_requests
+tensorflow
