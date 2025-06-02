@@ -62,7 +62,7 @@ def fetch_month(year: int, month: int):
 
         df = pd.DataFrame(data["hourly"])
         df.rename(columns={"time": "date"}, inplace=True)
-        df["date"] = pd.to_datetime(df["date"])  # Already in local tz; no need for tz_convert
+        df["date"] = pd.to_datetime(df["date"]) #.dt.tz_localize(TIME_ZONE.zone, nonexistent="shift_forward") to localise to London time
 
         # Validate expected number of rows
         expected_rows = calendar.monthrange(year, month)[1] * 24
