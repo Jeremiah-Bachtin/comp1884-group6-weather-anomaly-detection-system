@@ -17,7 +17,8 @@ try:
     if not isinstance(VARIABLES, list):
         raise ValueError
 except (SyntaxError, ValueError):
-    raise ValueError("VARIABLES in .env must be a valid Python list format.")
+    print("⚠️ Warning: VARIABLES in .env is invalid. Using default list.")
+    VARIABLES = ["temperature_2m", "surface_pressure", "precipitation", "wind_speed_10m"]
 
 # ===== Open-Meteo API ENDPOINTS ===========
 
@@ -33,7 +34,8 @@ TIME_ZONE_STRING = os.getenv("TIME_ZONE", "Europe/London")
 try:
     TIME_ZONE = pytz.timezone(TIME_ZONE_STRING)
 except pytz.UnknownTimeZoneError:
-    raise ValueError(f"Invalid timezone in .env: {TIME_ZONE_STRING}")
+    print(f"⚠️ Invalid timezone in .env: {TIME_ZONE_STRING}. Defaulting to Europe/London.")
+    TIME_ZONE = pytz.timezone("Europe/London")
 
 # ===== ANCHOR TIME CONFIGURATION =====
 try:
@@ -43,8 +45,9 @@ try:
     else:
         # Default to now in the specified timezone
         ANCHOR_TIME = datetime.now(TIME_ZONE).replace(minute=0, second=0, microsecond=0)
-except ValueError:
-    raise ValueError("Invalid ANCHOR_TIME format in .env. Use ISO format: 'YYYY-MM-DDTHH:MM:SS'.")
+except Exception as e:
+    print(f"⚠️ Invalid ANCHOR_TIME in .env: {e}. Using current time.")
+    ANCHOR_TIME = datetime.now(TIME_ZONE).replace(minute=0, second=0, microsecond=0)
 
 # ===== WINDOW CONFIGURATION =====
 ROLLING_WINDOW_HOURS = int(os.getenv("ROLLING_WINDOW_HOURS", 1440))
