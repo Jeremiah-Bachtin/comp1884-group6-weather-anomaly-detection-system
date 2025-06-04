@@ -1,23 +1,30 @@
-# Install these versions for GPU-enabled computation
-
-altair
-folium
-streamlit
-streamlit_folium
-plotly
+# === Core ML & Data Processing ===
 pandas==2.2.2
-numpy==1.24.4
-requests==2.32.3
-pytz==2025.2
+numpy==1.24.4                # Needed for GPU
 scikit-learn
 joblib==1.4.2
-# python-dotenv==1.1.0
 matplotlib==3.8.4
-PyDrive2==1.21.3
-pytest==8.2.0
-openmeteo_requests
-requests-cache
-retry-requests==2.0.0
 seaborn==0.13.2
-tensorflow==2.10.1
 tqdm
+pytz==2025.2
+
+# === API Access & Utilities ===
+requests==2.32.3
+python-dotenv==1.1.0
+requests-cache
+retry_requests==2.0.0
+
+# === Google Drive Integration ===
+PyDrive2==1.21.3
+
+# === ML Framework ===
+# tensorflow==2.10.1        # Temporarily disabled
+
+# === Interactive/Dashboard Tools (Temporarily disabled)
+# altair
+# folium
+# streamlit
+# streamlit_folium
+
+# === Testing ===
+pytest==8.2.0
