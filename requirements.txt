@@ -18,13 +18,13 @@ retry_requests==2.0.0
 PyDrive2==1.21.3
 
 # === ML Framework ===
-# tensorflow==2.10.1        # Temporarily disabled
+tensorflow==2.10.1
 
-# === Interactive/Dashboard Tools (Temporarily disabled)
-# altair
-# folium
-# streamlit
-# streamlit_folium
+# === Interactive/Dashboard Tools
+altair
+folium
+streamlit
+streamlit_folium
 
 # === Testing ===
 pytest==8.2.0
