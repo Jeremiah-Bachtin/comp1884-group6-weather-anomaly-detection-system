@@ -1,6 +1,6 @@
 import os
 from utils.drive_upload import upload_file_to_drive
-from config.config import DRIVE_FOLDER_HISTORICAL  # Swap for any other test folder
+from config.original_config import DRIVE_FOLDER_HISTORICAL  # Swap for any other test folder
 
 def main():
     # Create a test file if it doesn't exist

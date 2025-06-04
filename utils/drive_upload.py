@@ -1,7 +1,7 @@
 import os
 from pydrive2.auth import GoogleAuth
 from pydrive2.drive import GoogleDrive
-from config.config import CLIENT_SECRETS_PATH
+from config.original_config import CLIENT_SECRETS_PATH
 
 CREDENTIALS_PATH = "credentials.json"  # or store elsewhere if needed
 

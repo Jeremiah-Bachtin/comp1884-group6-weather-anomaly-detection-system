@@ -6,7 +6,7 @@ Generates a trimmed 72h forecast and a 1440h rolling window up to the anchor tim
 import os
 import pandas as pd
 from datetime import datetime, timedelta
-from config.config import (
+from config.original_config import (
     LAT, LON, VARIABLES, MODEL_FORECAST, MODEL_HISTORICAL,
     ROLLING_WINDOW_HOURS, FORECAST_BACKFILL_HOURS, FORECAST_TRIM_HOURS,
     FORECAST_PAST_DAYS, FORECAST_FUTURE_DAYS, HISTORICAL_API_URL,

@@ -8,7 +8,7 @@ import calendar
 import pandas as pd
 import requests
 from datetime import datetime, timedelta
-from config.config import (
+from config.original_config import (
     LAT, LON, VARIABLES, TIME_ZONE,
     MODEL_HISTORICAL, HISTORICAL_API_URL,
     START_YEAR, START_MONTH
