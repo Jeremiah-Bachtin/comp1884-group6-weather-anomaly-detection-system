@@ -10,8 +10,8 @@ def fetch_hourly_dataframe(url, params):
     df = pd.DataFrame(data["hourly"])
     df.rename(columns={"time": "date"}, inplace=True)
 
-    # Localise using TIME_ZONE
-    df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(TIME_ZONE, nonexistent="shift_forward")
-
+    # Since API already returns data in the requested timezone, just parse as-is
+    df["date"] = pd.to_datetime(df["date"])
+    
     df.drop_duplicates(subset="date", keep="first", inplace=True)
     return df

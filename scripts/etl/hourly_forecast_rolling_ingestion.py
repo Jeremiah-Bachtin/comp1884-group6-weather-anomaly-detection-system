@@ -83,7 +83,8 @@ def save_rolling_window(df: pd.DataFrame, anchor_time: datetime):
 def main():
     log_event("Starting hourly ingestion anchored at latest full hour.", module="forecast_ingestion")
 
-    anchor = ANCHOR_TIME
+    # Convert timezone-aware anchor to naive (since data will be timezone-naive)
+    anchor = ANCHOR_TIME.replace(tzinfo=None)  # Remove timezone info
     hist_start = anchor - timedelta(hours=ROLLING_WINDOW_HOURS + 1)
     hist_end = anchor - timedelta(hours=FORECAST_BACKFILL_HOURS)
 

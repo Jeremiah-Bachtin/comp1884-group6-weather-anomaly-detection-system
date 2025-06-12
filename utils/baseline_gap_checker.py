@@ -7,7 +7,7 @@ def check_baseline_file(baseline_path):
 
     # Load the baseline dataset
     df = pd.read_csv(baseline_path)
-    df["date"] = pd.to_datetime(df["date"], utc=True).dt.tz_convert("Europe/London")
+    df["date"] = pd.to_datetime(df["date"])  # Data is already in London local time
     df = df.sort_values("date")
 
     # Basic file info
