@@ -24,10 +24,10 @@ def check_baseline_file(baseline_path):
     # Row count check
     expected_rows = 1440
     if abs(total_rows - expected_rows) > 2:
-        print(f"\n⚠️ Warning: Rolling window has {total_rows} rows, expected {expected_rows}.")
+        print(f"\nWarning: Rolling window has {total_rows} rows, expected {expected_rows}.")
 
     # Gap analysis
-    print("\n🔍 Gap Analysis:")
+    print("\nGap Analysis:")
     diffs = df["date"].diff()
     gap_counts = diffs.value_counts().sort_index()
     print(gap_counts)
@@ -35,28 +35,28 @@ def check_baseline_file(baseline_path):
     # Check for missing gaps
     missing_gaps = gap_counts[gap_counts.index > pd.Timedelta(hours=1)]
     if not missing_gaps.empty:
-        print("\n❗ Missing intervals detected:")
+        print("\nMissing intervals detected:")
         print(missing_gaps)
     else:
-        print("✅ No missing intervals detected (only normal DST shifts possible).")
+        print("No missing intervals detected (only normal DST shifts possible).")
 
     # Extended rows per day analysis
     df["date_only"] = df["date"].dt.floor("D")
     rows_per_day = df.groupby("date_only").size()
 
-    print("\n📊 Rows per day (for reference):")
+    print("\nRows per day (for reference):")
     print(rows_per_day)
 
-    print(f"\n✅ Days with exactly 24 hours: {sum(rows_per_day == 24)}")
-    print(f"⚠️ Days with missing hours (<24h): {sum(rows_per_day < 24)}")
-    print(f"⚠️ Days with extra hours (>24h): {sum(rows_per_day > 24)}")
+    print(f"\nDays with exactly 24 hours: {sum(rows_per_day == 24)}")
+    print(f"Days with missing hours (<24h): {sum(rows_per_day < 24)}")
+    print(f"Days with extra hours (>24h): {sum(rows_per_day > 24)}")
 
 if __name__ == "__main__":
     # Set project root and file location
     project_root = find_project_root()
     baseline_folder = os.path.join(project_root, "data", "processed", "rolling_window")
 
-    # ⚠️ Set your baseline file name here manually each time you check
+    # Set your baseline file name here manually each time you check
     filename = "baseline_rolling_1440h_until_20250427_10.csv"  # <<<<< Update accordingly!
     baseline_csv_path = os.path.join(baseline_folder, filename)
 

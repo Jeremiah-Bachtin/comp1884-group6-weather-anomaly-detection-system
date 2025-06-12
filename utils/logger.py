@@ -1,6 +1,6 @@
 """
 Project-wide logger utility.
-Logs timestamped messages into a daily file under logs/.
+Logs timestamped messages into a log file under logs/.
 """
 
 import os

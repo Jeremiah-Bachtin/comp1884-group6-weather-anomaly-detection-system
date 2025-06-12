@@ -1,6 +1,5 @@
 import requests
 import pandas as pd
-from config.original_config import TIME_ZONE
 
 def fetch_hourly_dataframe(url, params):
     response = requests.get(url, params=params)
