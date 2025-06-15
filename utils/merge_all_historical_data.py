@@ -51,6 +51,7 @@ def merge_historical():
 
         all_dfs.append(df_sorted)
 
+    # Combine all monthly DataFrames and sort chronologically
     merged_df = pd.concat(all_dfs).sort_values("date").reset_index(drop=True)
 
     start = merged_df["date"].min().strftime("%Y%m")

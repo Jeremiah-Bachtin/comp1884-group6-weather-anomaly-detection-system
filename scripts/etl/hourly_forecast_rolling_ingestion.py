@@ -1,7 +1,11 @@
 """
-Hourly ingestion of Open-Meteo forecast + historical data.
-Generates a trimmed 72h forecast and a 1440h rolling window up to the anchor time.
+Hourly ingestion of Open-Meteo forecast and historical data.
+
+Generates:
+- A trimmed 72-hour forecast starting from the anchor time (inclusive).
+- A 1440-hour rolling historical window ending at the anchor time (exclusive).
 """
+
 
 import os
 import pandas as pd

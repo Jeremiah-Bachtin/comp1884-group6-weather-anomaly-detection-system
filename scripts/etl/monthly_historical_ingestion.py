@@ -1,7 +1,10 @@
 """
 Monthly ingestion of IFS historical data from Open-Meteo.
-Builds monthly CSVs from Feb 2017 to the most recent *full* month.
+
+Fetches and saves monthly CSVs from February 2017 up to the latest full month.
+Skips months where complete data is not yet available due to API lag.
 """
+
 
 import os
 import calendar
