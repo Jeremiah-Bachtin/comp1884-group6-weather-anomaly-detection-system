@@ -229,8 +229,8 @@ def load_sample_data():
 
         # Check for Marie's XAI columns
         xai_columns = [
-            'reconstruction_error_summary', 'reconstruction_error_plot',
-            'TreeSHAP_natural_language_summary', 'local_contribution_plot_path'
+            'rea_summary', 'rea_plot_path',
+            'treeshap_summary', 'treeshap_plot_path'
         ]
         has_xai = all(col in data.columns for col in xai_columns)
 
@@ -768,7 +768,7 @@ def generate_natural_language_explanation(current_data, anomaly_explanations=Non
         explanation += f"• Isolation Forest Score: {earliest['if_score']:.3f} (threshold: {earliest['if_threshold']:.3f})<br>"
         explanation += f"• LSTM Reconstruction Error: {earliest['lstm_error']:.3f} (threshold: {earliest['lstm_threshold']:.3f})<br><br>"
 
-        if 'TreeSHAP_natural_language_summary' in earliest and pd.notna(earliest['TreeSHAP_natural_language_summary']):
+        if 'treeshap_summary' in earliest and pd.notna(earliest['treeshap_summary']):
             explanation += "<strong>🧠 Marie's XAI Analysis:</strong><br>"
             explanation += f"• {earliest['TreeSHAP_natural_language_summary']}<br><br>"
 
@@ -940,8 +940,8 @@ def main():
 
             # Marie's XAI explanation if available and anomaly detected
             if (current['pseudo_label'] != 'Normal' and
-                'reconstruction_error_summary' in current and
-                pd.notna(current['reconstruction_error_summary'])):
+                'rea_summary' in current and
+                pd.notna(current['rea_summary'])):
                 st.markdown(f'<div class="xai-explanation"><strong>🧠 Marie\'s Detailed Analysis:</strong><br>{current["reconstruction_error_summary"]}</div>',
                             unsafe_allow_html=True)
 
@@ -1323,11 +1323,11 @@ def main():
                     st.write(f"**Wind Speed:** {selected_anomaly['wind_speed_10m']:.1f} km/h")
 
                 # Marie's XAI Analysis for this specific anomaly
-                if 'TreeSHAP_natural_language_summary' in selected_anomaly and pd.notna(selected_anomaly['TreeSHAP_natural_language_summary']):
+                if 'treeshap_summary' in selected_anomaly and pd.notna(selected_anomaly['treeshap_summary']):
                     st.markdown("**🧠 Marie's XAI Analysis for this Anomaly:**")
                     st.info(selected_anomaly['TreeSHAP_natural_language_summary'])
 
-                if 'reconstruction_error_summary' in selected_anomaly and pd.notna(selected_anomaly['reconstruction_error_summary']):
+                if 'rea_summary' in selected_anomaly and pd.notna(selected_anomaly['rea_summary']):
                     st.markdown("**🔬 Reconstruction Error Analysis:**")
                     st.info(selected_anomaly['reconstruction_error_summary'])
             else:
