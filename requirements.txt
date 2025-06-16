@@ -1,39 +1,7 @@
-# === Core ML & Data Processing ===
-pandas==2.2.2
-numpy==1.24.4
-scikit-learn==1.4.2
-scipy==1.10.1
-joblib==1.2.0
-matplotlib==3.8.4
-seaborn==0.13.2
-tqdm
-pytz==2025.2
-
-# === ML Framework ===
-tensorflow==2.10.1
-
-# === XAI Framework ===
-shap
-
-# === API Access & Utilities ===
-requests==2.32.3
-python-dotenv==1.1.0
-requests-cache
-retry_requests==2.0.0
-
-# === Google Drive Integration ===
-PyDrive2==1.21.3
-
-# === Interactive/Dashboard Tools
-altair
-folium
 streamlit
-streamlit_folium
+pandas
+numpy
+altair
 plotly
-
-# === Testing ===
-pytest==8.2.0
-
-# === Jupyter Notebook Compatibility ===
-ipywidgets>=8.0
-widgetsnbextension>=4.0
+folium
+streamlit-folium
