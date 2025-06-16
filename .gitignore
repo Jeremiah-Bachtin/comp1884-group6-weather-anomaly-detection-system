@@ -67,3 +67,5 @@ data/*
 !data/README.md
 outputs/*
 !outputs/README.md
+*.csv
+!outputs/xai/tpa-treeshap-rea.csv
