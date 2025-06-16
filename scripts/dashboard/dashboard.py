@@ -728,43 +728,49 @@ def get_metric_status(value, metric_type, season='summer'):
 
 
 def generate_natural_language_explanation(current_data, anomaly_explanations=None):
-    """Enhanced with Marie's XAI Integration"""
-    latest = current_data.iloc[0]  # FIXED: Use first hour's metrics instead of last
+    """Enhanced with Marie's XAI Integration (render-safe version for Streamlit)"""
+    earliest = current_data.iloc[0]  # Use first hour's metrics
 
-    explanation = f"**Current Weather Assessment** (Updated: {latest['timestamp'].strftime('%d %B %Y, %H:%M')})<br><br>"
+    explanation = f"<strong>Current Weather Assessment</strong> (Updated: {earliest['timestamp'].strftime('%d %B %Y, %H:%M')})<br><br>"
 
-    if latest['pseudo_label'] == 'Normal':
-        explanation += "✅ **Status: NORMAL CONDITIONS**<br>"
+    label = earliest['pseudo_label']
+    if label == 'Normal':
+        explanation += "✅ <strong>Status: NORMAL CONDITIONS</strong><br>"
         explanation += "All weather parameters are within expected ranges.<br><br>"
-    elif latest['pseudo_label'] == 'Point Anomaly':
-        explanation += "⚠️ **Status: ANOMALY DETECTED**<br>"
-        explanation += "One or more weather parameters show unusual readings.<br><br>"
-    elif latest['pseudo_label'] == 'Pattern Anomaly':
-        explanation += "🚨 **Status: COMPOUND ANOMALY**<br>"
-        explanation += "Multiple weather systems showing coordinated unusual behaviour.<br><br>"
+    elif label == 'Point Anomaly':
+        explanation += "⚠️ <strong>Status: POINT ANOMALY</strong><br>"
+        explanation += "The Isolation Forest component flagged a localised deviation in one or more variables.<br><br>"
+    elif label == 'Pattern Anomaly':
+        explanation += "🚨 <strong>Status: PATTERN ANOMALY</strong><br>"
+        explanation += "The LSTM Autoencoder detected an unusual sequence over time, indicating abnormal weather evolution.<br><br>"
+    elif label == 'Compound Anomaly':
+        explanation += "🚨 <strong>Status: COMPOUND ANOMALY</strong><br>"
+        explanation += "Both models independently flagged anomalies, suggesting a significant and coordinated deviation from normal patterns..<br><br>"
     else:
-        explanation += "❓ **Status: UNCERTAIN**<br>"
-        explanation += "Mixed signals in weather data - monitoring required.<br><br>"
+        explanation += "❓ <strong>Status: UNCERTAIN</strong><br>"
+        explanation += "Mixed signals in weather data – monitoring required.<br><br>"
 
-    conf_badge = f"<span class='confidence-badge confidence-{latest['confidence'].lower()}'>{latest['confidence']} Confidence</span>"
-    explanation += f"**Model Confidence:** {conf_badge}<br><br>"
+    # Confidence badge
+    conf_class = earliest['confidence'].lower()
+    conf_badge = f"<span class='confidence-badge confidence-{conf_class}'>{earliest['confidence']} Confidence</span>"
+    explanation += f"<strong>Model Confidence:</strong> {conf_badge}<br><br>"
 
-    explanation += "**Current Readings:**<br>"
-    explanation += f"• Temperature: {latest['temperature_2m']:.1f}°C<br>"
-    explanation += f"• Pressure: {latest['surface_pressure']:.1f} hPa<br>"
-    explanation += f"• Precipitation: {latest['precipitation']:.1f} mm<br>"
-    explanation += f"• Wind Speed: {latest['wind_speed_10m']:.1f} km/h<br><br>"
+    # Current readings
+    explanation += "<strong>Current Readings:</strong><br>"
+    explanation += f"• Temperature: {earliest['temperature_2m']:.1f}°C<br>"
+    explanation += f"• Pressure: {earliest['surface_pressure']:.1f} hPa<br>"
+    explanation += f"• Precipitation: {earliest['precipitation']:.1f} mm<br>"
+    explanation += f"• Wind Speed: {earliest['wind_speed_10m']:.1f} km/h<br><br>"
 
-    # Add Marie's XAI insights if available
-    if latest['pseudo_label'] != 'Normal':
-        explanation += "**🔬 AI Model Analysis:**<br>"
-        explanation += f"• Isolation Forest Score: {latest['if_score']:.3f} (threshold: {latest['if_threshold']:.3f})<br>"
-        explanation += f"• LSTM Reconstruction Error: {latest['lstm_error']:.3f} (threshold: {latest['lstm_threshold']:.3f})<br><br>"
+    # Anomaly model scores
+    if label != 'Normal':
+        explanation += "<strong>🔬 AI Model Analysis:</strong><br>"
+        explanation += f"• Isolation Forest Score: {earliest['if_score']:.3f} (threshold: {earliest['if_threshold']:.3f})<br>"
+        explanation += f"• LSTM Reconstruction Error: {earliest['lstm_error']:.3f} (threshold: {earliest['lstm_threshold']:.3f})<br><br>"
 
-        # Include Marie's TreeSHAP summary if available
-        if 'TreeSHAP_natural_language_summary' in latest and pd.notna(latest['TreeSHAP_natural_language_summary']):
-            explanation += "**🧠 Marie's XAI Analysis:**<br>"
-            explanation += f"• {latest['TreeSHAP_natural_language_summary']}<br><br>"
+        if 'TreeSHAP_natural_language_summary' in earliest and pd.notna(earliest['TreeSHAP_natural_language_summary']):
+            explanation += "<strong>🧠 Marie's XAI Analysis:</strong><br>"
+            explanation += f"• {earliest['TreeSHAP_natural_language_summary']}<br><br>"
 
     return explanation
 
@@ -1360,8 +1366,6 @@ def main():
             Data Sources: Open Meteo API, UKMO Seamless model
             Update Frequency: 1 hour
             Weather Model Resolution: 2-10km
-            Validation Method: Time series cross-validation
-            Performance Metrics: Precision/Recall optimised for operational use
             XAI Integration: TreeSHAP local explanations & reconstruction error monitoring
             """)
 
@@ -1453,6 +1457,7 @@ def main():
     **Model Status:** ✅ Active
     **Last Training:** 30 May 2025
     **Data Sources:** Open Meteo API, UKMO Seamless model
+    **Data licensed under:** CC BY 4.0 – Open-Meteo.com
     **Update Frequency:** 1 hour
     **Weather Model Resolution:** 2-10km
     **XAI Integration:** TreeSHAP & REA
