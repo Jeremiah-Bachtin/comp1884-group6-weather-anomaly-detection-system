@@ -230,7 +230,7 @@ def load_sample_data():
         # Check for Marie's XAI columns
         xai_columns = [
             'reconstruction_error_summary', 'reconstruction_error_plot',
-            'TreeSHAP_natural_language_summary', 'local_contribution_plot_path'
+            'treeshap_summary', 'treeshap_plot_path'
         ]
         has_xai = all(col in data.columns for col in xai_columns)
 
@@ -363,9 +363,9 @@ def load_fallback_data():
             'pseudo_label': pseudo_label,
             # Marie's XAI simulation
             'reconstruction_error_summary': reconstruction_summary,
-            'TreeSHAP_natural_language_summary': treeshap_summary,
+            'treeshap_summary': treeshap_summary,
             'reconstruction_error_plot': f"plots/reconstruction_error_{i}.png",
-            'local_contribution_plot_path': f"plots/shap_local_{i}.png"
+            'treeshap_plot_path': f"plots/shap_local_{i}.png"
         })
 
     df = pd.DataFrame(data)
@@ -768,9 +768,9 @@ def generate_natural_language_explanation(current_data, anomaly_explanations=Non
         explanation += f"• Isolation Forest Score: {earliest['if_score']:.3f} (threshold: {earliest['if_threshold']:.3f})<br>"
         explanation += f"• LSTM Reconstruction Error: {earliest['lstm_error']:.3f} (threshold: {earliest['lstm_threshold']:.3f})<br><br>"
 
-        if 'TreeSHAP_natural_language_summary' in earliest and pd.notna(earliest['TreeSHAP_natural_language_summary']):
+        if 'treeshap_summary' in earliest and pd.notna(earliest['treeshap_summary']):
             explanation += "<strong>🧠 Marie's XAI Analysis:</strong><br>"
-            explanation += f"• {earliest['TreeSHAP_natural_language_summary']}<br><br>"
+            explanation += f"• {earliest['treeshap_summary']}<br><br>"
 
     return explanation
 
@@ -838,7 +838,7 @@ def main():
     # Integration status indicator
     if len(weather_data) > 0:
         # Check if XAI columns are present
-        has_xai = all(col in weather_data.columns for col in ['TreeSHAP_natural_language_summary', 'reconstruction_error_summary'])
+        has_xai = all(col in weather_data.columns for col in ['treeshap_summary', 'reconstruction_error_summary'])
         xai_status = "Marie's XAI Analysis Integrated" if has_xai else "Base ML Integration"
 
         st.markdown(f"""
@@ -1323,9 +1323,9 @@ def main():
                     st.write(f"**Wind Speed:** {selected_anomaly['wind_speed_10m']:.1f} km/h")
 
                 # Marie's XAI Analysis for this specific anomaly
-                if 'TreeSHAP_natural_language_summary' in selected_anomaly and pd.notna(selected_anomaly['TreeSHAP_natural_language_summary']):
+                if 'treeshap_summary' in selected_anomaly and pd.notna(selected_anomaly['treeshap_summary']):
                     st.markdown("**🧠 Marie's XAI Analysis for this Anomaly:**")
-                    st.info(selected_anomaly['TreeSHAP_natural_language_summary'])
+                    st.info(selected_anomaly['treeshap_summary'])
 
                 if 'reconstruction_error_summary' in selected_anomaly and pd.notna(selected_anomaly['reconstruction_error_summary']):
                     st.markdown("**🔬 Reconstruction Error Analysis:**")
@@ -1485,7 +1485,7 @@ def main():
         st.sidebar.write("Data columns:", list(weather_data.columns))
         st.sidebar.write("Anomaly labels:", weather_data['anomaly_label'].unique() if len(weather_data) > 0 else "No data")
         st.sidebar.write("Data shape:", weather_data.shape if len(weather_data) > 0 else "No data")
-        has_xai = 'TreeSHAP_natural_language_summary' in weather_data.columns if len(weather_data) > 0 else False
+        has_xai = 'treeshap_summary' in weather_data.columns if len(weather_data) > 0 else False
         st.sidebar.write("XAI Integration:", "✅ Active" if has_xai else "❌ Not detected")
         st.sidebar.write("Time column used:", "date")
         st.sidebar.write("File path tested:", ["data/dashboard_input_20250531_1700_merged.csv"])
