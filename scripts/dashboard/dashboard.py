@@ -229,7 +229,7 @@ def load_sample_data():
 
         # Check for Marie's XAI columns
         xai_columns = [
-            'reconstruction_error_summary', 'reconstruction_error_plot',
+            'rea_summary', 'rea_plot_path',
             'treeshap_summary', 'treeshap_plot_path'
         ]
         has_xai = all(col in data.columns for col in xai_columns)
@@ -362,9 +362,9 @@ def load_fallback_data():
             'confidence': confidence,
             'pseudo_label': pseudo_label,
             # Marie's XAI simulation
-            'reconstruction_error_summary': reconstruction_summary,
+            'rea_summary': reconstruction_summary,
             'treeshap_summary': treeshap_summary,
-            'reconstruction_error_plot': f"plots/reconstruction_error_{i}.png",
+            'rea_plot_path': f"plots/reconstruction_error_{i}.png",
             'treeshap_plot_path': f"plots/shap_local_{i}.png"
         })
 
@@ -838,7 +838,7 @@ def main():
     # Integration status indicator
     if len(weather_data) > 0:
         # Check if XAI columns are present
-        has_xai = all(col in weather_data.columns for col in ['treeshap_summary', 'reconstruction_error_summary'])
+        has_xai = all(col in weather_data.columns for col in ['treeshap_summary', 'rea_summary'])
         xai_status = "Marie's XAI Analysis Integrated" if has_xai else "Base ML Integration"
 
         st.markdown(f"""
@@ -940,9 +940,9 @@ def main():
 
             # Marie's XAI explanation if available and anomaly detected
             if (current['pseudo_label'] != 'Normal' and
-                'reconstruction_error_summary' in current and
-                pd.notna(current['reconstruction_error_summary'])):
-                st.markdown(f'<div class="xai-explanation"><strong>🧠 Marie\'s Detailed Analysis:</strong><br>{current["reconstruction_error_summary"]}</div>',
+                'rea_summary' in current and
+                pd.notna(current['rea_summary'])):
+                st.markdown(f'<div class="xai-explanation"><strong>🧠 Marie\'s Detailed Analysis:</strong><br>{current["rea_summary"]}</div>',
                             unsafe_allow_html=True)
 
             # Investigation recommendations based on Jeremy's anomaly classifications - UPDATED per Marie's feedback
@@ -1327,9 +1327,9 @@ def main():
                     st.markdown("**🧠 Marie's XAI Analysis for this Anomaly:**")
                     st.info(selected_anomaly['treeshap_summary'])
 
-                if 'reconstruction_error_summary' in selected_anomaly and pd.notna(selected_anomaly['reconstruction_error_summary']):
+                if 'rea_summary' in selected_anomaly and pd.notna(selected_anomaly['rea_summary']):
                     st.markdown("**🔬 Reconstruction Error Analysis:**")
-                    st.info(selected_anomaly['reconstruction_error_summary'])
+                    st.info(selected_anomaly['rea_summary'])
             else:
                 st.info("No anomalies detected in current dataset for detailed analysis.")
 
