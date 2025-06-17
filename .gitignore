@@ -68,4 +68,3 @@ data/*
 outputs/*
 !outputs/README.md
 *.csv
-!outputs/xai/tpa-treeshap-rea.csv
