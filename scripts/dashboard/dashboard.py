@@ -193,7 +193,7 @@ def load_sample_data():
     """Enhanced Data Loading with Jeremy's ML Pipeline and Marie's XAI Integration"""
     try:
         # CSV file path - Note for Jeremy: Update this when shared on your github repo
-        file_path = "outputs/xai/tpa-treeshap-rea.csv"
+        file_path = "outputs/xai/tpa-treeshap-rea-test.csv"
 
         try:
             # Load the CSV file
