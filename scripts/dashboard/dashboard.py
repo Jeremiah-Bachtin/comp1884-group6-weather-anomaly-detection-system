@@ -3,7 +3,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import datetime
 import altair as alt
 import folium
@@ -11,9 +11,9 @@ from streamlit_folium import st_folium
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
-import json
-import time
-import os
+# import json
+# import time
+# import os
 
 # ================================================================================================
 # STYLING AND PAGE CONFIGURATION
@@ -193,7 +193,7 @@ def load_sample_data():
     """Enhanced Data Loading with Jeremy's ML Pipeline and Marie's XAI Integration"""
     try:
         # CSV file path - Note for Jeremy: Update this when shared on your github repo
-        file_path = "outputs/xai/tpa-treeshap-rea.csv"
+        file_path = "outputs/xai/tpa-treeshap-rea-final.csv"
 
         try:
             # Load the CSV file
@@ -362,10 +362,10 @@ def load_fallback_data():
             'confidence': confidence,
             'pseudo_label': pseudo_label,
             # Marie's XAI simulation
-            'reconstruction_error_summary': reconstruction_summary,
-            'TreeSHAP_natural_language_summary': treeshap_summary,
-            'reconstruction_error_plot': f"plots/reconstruction_error_{i}.png",
-            'local_contribution_plot_path': f"plots/shap_local_{i}.png"
+            'rea_summary': reconstruction_summary,
+            'treeshap_summary': treeshap_summary,
+            'rea_plot_path': f"plots/reconstruction_error_{i}.png",
+            'treeshap_plot_path': f"plots/shap_local_{i}.png"
         })
 
     df = pd.DataFrame(data)
@@ -770,7 +770,7 @@ def generate_natural_language_explanation(current_data, anomaly_explanations=Non
 
         if 'treeshap_summary' in earliest and pd.notna(earliest['treeshap_summary']):
             explanation += "<strong>🧠 Marie's XAI Analysis:</strong><br>"
-            explanation += f"• {earliest['TreeSHAP_natural_language_summary']}<br><br>"
+            explanation += f"• {earliest['treeshap_summary']}<br><br>"
 
     return explanation
 
@@ -838,7 +838,7 @@ def main():
     # Integration status indicator
     if len(weather_data) > 0:
         # Check if XAI columns are present
-        has_xai = all(col in weather_data.columns for col in ['TreeSHAP_natural_language_summary', 'reconstruction_error_summary'])
+        has_xai = all(col in weather_data.columns for col in ['treeshap_summary', 'rea_summary'])
         xai_status = "Marie's XAI Analysis Integrated" if has_xai else "Base ML Integration"
 
         st.markdown(f"""
@@ -942,7 +942,7 @@ def main():
             if (current['pseudo_label'] != 'Normal' and
                 'rea_summary' in current and
                 pd.notna(current['rea_summary'])):
-                st.markdown(f'<div class="xai-explanation"><strong>🧠 Marie\'s Detailed Analysis:</strong><br>{current["reconstruction_error_summary"]}</div>',
+                st.markdown(f'<div class="xai-explanation"><strong>🧠 Marie\'s Detailed Analysis:</strong><br>{current["rea_summary"]}</div>',
                             unsafe_allow_html=True)
 
             # Investigation recommendations based on Jeremy's anomaly classifications - UPDATED per Marie's feedback
@@ -1325,11 +1325,11 @@ def main():
                 # Marie's XAI Analysis for this specific anomaly
                 if 'treeshap_summary' in selected_anomaly and pd.notna(selected_anomaly['treeshap_summary']):
                     st.markdown("**🧠 Marie's XAI Analysis for this Anomaly:**")
-                    st.info(selected_anomaly['TreeSHAP_natural_language_summary'])
+                    st.info(selected_anomaly['treeshap_summary'])
 
                 if 'rea_summary' in selected_anomaly and pd.notna(selected_anomaly['rea_summary']):
                     st.markdown("**🔬 Reconstruction Error Analysis:**")
-                    st.info(selected_anomaly['reconstruction_error_summary'])
+                    st.info(selected_anomaly['rea_summary'])
             else:
                 st.info("No anomalies detected in current dataset for detailed analysis.")
 
@@ -1485,7 +1485,7 @@ def main():
         st.sidebar.write("Data columns:", list(weather_data.columns))
         st.sidebar.write("Anomaly labels:", weather_data['anomaly_label'].unique() if len(weather_data) > 0 else "No data")
         st.sidebar.write("Data shape:", weather_data.shape if len(weather_data) > 0 else "No data")
-        has_xai = 'TreeSHAP_natural_language_summary' in weather_data.columns if len(weather_data) > 0 else False
+        has_xai = 'treeshap_summary' in weather_data.columns if len(weather_data) > 0 else False
         st.sidebar.write("XAI Integration:", "✅ Active" if has_xai else "❌ Not detected")
         st.sidebar.write("Time column used:", "date")
         st.sidebar.write("File path tested:", ["data/dashboard_input_20250531_1700_merged.csv"])
