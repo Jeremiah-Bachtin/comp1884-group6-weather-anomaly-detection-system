@@ -15,9 +15,6 @@ __pycache__/
 # === Environment and secrets ===
 .env
 *.env
-client_secrets.json
-credentials.json
-config/credentials.json
 config/_local.py
 
 # === Virtual environments ===
